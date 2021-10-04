@@ -1,0 +1,1 @@
+java -jar -ea -Dorg.osgi.service.http.port=$PORT -Declipse.ignoreApp=true -Dosgi.clean=true -Ddebug=true plugins/org.eclipse.equinox.launcher_*.jar -console -noExit
