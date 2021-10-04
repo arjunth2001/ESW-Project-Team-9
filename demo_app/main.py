@@ -16,7 +16,7 @@ from streamlit_autorefresh import st_autorefresh
 
 # Run the autorefresh about every 1000 milliseconds (1 seconds) and stop
 # after it's been refreshed 100 times.
-PAGE_CONFIG = {'page_title':'ESW Project'}
+PAGE_CONFIG = {'page_title':'ESW Project','layout':"wide"}
 st.set_page_config(**PAGE_CONFIG)
 
 import hashlib
@@ -59,17 +59,15 @@ def main():
     if "reload" not in st.session_state:
         st.session_state.reload=True
         st.session_state.count=0
-        st.session_state.occupants=[1,0,3,4]
-        st.session_state.hour = [1,2,3,4]
+        st.session_state.occupants=[1]
+        st.session_state.hour = [1]
     else:
-        st.session_state.count+=1
-        st.warning(f"rerun:{st.session_state.count}")
         st.session_state.occupants.append(np.random.choice([0,1,2,4,5]))
-        st.session_state.hour.append((st.session_state.hour[-1]+1)%24)
-        if len(st.session_state.occupants)>=24:
-            st.session_state.occupants = st.session_state.occupants[1:]
-            st.session_state.hour = st.session_state.hour[1:]
-
+        if st.session_state.hour[-1]!=24:
+            st.session_state.hour.append(st.session_state.hour[-1]+1)
+        else:
+            st.session_state.hour=[0]
+            st.session_state.occupants=[1]
     file_path_type = ["./images/*.png", "./images/*.jpeg","./images/*.jpg"]
     images = glob.glob(random.choice(file_path_type))
     random_image = random.choice(images)
@@ -124,14 +122,22 @@ def main():
                     clean_db = pd.DataFrame(user_result,columns=["Username","Password"])
                     st.dataframe(clean_db)
         else:
-            st.markdown("### Grid Eye")
-            fig, ax = plt.subplots()
-            ax = sns.heatmap(st.session_state.grid_eye)
-            st.pyplot(fig)
-            st.markdown("### Occupancy")
-            fig, ax = plt.subplots()
-            ax = plt.plot(st.session_state.hour, st.session_state.occupants)
-            st.pyplot(fig)
+            c1, c2, c3 = st.columns((1, 1, 1))
+            with c1:
+                st.markdown("### Grid Eye")
+                fig, ax = plt.subplots()
+                fig.patch.set_facecolor('#EAE7DC')
+                ax = sns.heatmap(st.session_state.grid_eye)
+                st.pyplot(fig)
+            with c2:
+                st.markdown("### Occupancy")
+                fig, ax = plt.subplots()
+                fig.patch.set_facecolor('#EAE7DC')
+                ax = plt.plot(st.session_state.hour, st.session_state.occupants)
+                st.pyplot(fig)
+            with c3:
+                st.markdown("### ESP32 Cam")
+                st.image(random_image)
 
 if __name__ == '__main__':
     main()
