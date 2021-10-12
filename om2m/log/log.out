@@ -262,3 +262,81 @@ Response in Router= ResponsePrimitive [
    }
 }
 ]
+[2021-10-11 12:57:33,840 INFO] - org.eclipse.om2m.datamapping.jaxb.Activator 
+Starting Data Mapper
+[2021-10-11 12:57:33,841 INFO] - org.eclipse.om2m.datamapping.jaxb.Activator 
+Registering XML Mapper Service..
+[2021-10-11 12:57:34,485 INFO] - org.eclipse.om2m.datamapping.jaxb.Activator 
+XML Mapper service registered.
+[2021-10-11 12:57:34,486 INFO] - org.eclipse.om2m.datamapping.jaxb.Activator 
+Registering JSON Mapper Service..
+[2021-10-11 12:57:34,714 INFO] - org.eclipse.om2m.datamapping.jaxb.Activator 
+JSON Mapper service registered.
+[2021-10-11 12:57:34,716 INFO] - org.eclipse.om2m.binding.http.Activator 
+Register HTTP RestClientService..
+[2021-10-11 12:57:34,725 INFO] - org.eclipse.om2m.binding.http.Activator 
+HTTP RestClientService is registered.
+[2021-10-11 12:57:34,725 INFO] - org.eclipse.om2m.binding.http.Activator 
+Register SSL RestClientService..
+[2021-10-11 12:57:34,731 INFO] - org.eclipse.om2m.binding.http.Activator 
+SSL RestClientService is registered.
+[2021-10-11 12:57:34,770 INFO] - org.eclipse.om2m.binding.websocket.Activator 
+Start websocket binding
+[2021-10-11 12:57:34,770 INFO] - org.eclipse.om2m.binding.websocket.Activator 
+Start websocket server
+[2021-10-11 12:57:34,770 INFO] - org.eclipse.om2m.binding.websocket.Activator 
+Register HTTP RestClientService..
+[2021-10-11 12:57:34,772 INFO] - org.eclipse.om2m.binding.websocket.Activator 
+HTTP RestClientService is registered.
+[2021-10-11 12:57:34,772 INFO] - org.eclipse.om2m.binding.websocket.Activator 
+DataMapperService discovered
+[2021-10-11 12:57:34,772 INFO] - org.eclipse.om2m.binding.websocket.Activator 
+DataMapperService discovered
+[2021-10-11 12:57:34,773 INFO] - org.eclipse.om2m.persistence.eclipselink.Activator 
+Starting Persistence JPA plugin...
+[2021-10-11 12:57:34,774 INFO] - org.eclipse.om2m.persistence.eclipselink.internal.DBServiceJPAImpl 
+Initializing Database...
+[2021-10-11 12:57:34,775 INFO] - org.eclipse.om2m.persistence.eclipselink.internal.DBServiceJPAImpl 
+Creating new EntityManagerFactory...
+[2021-10-11 12:57:34,789 INFO] - org.eclipse.om2m.binding.http.Activator 
+HttpService discovered
+[2021-10-11 12:57:34,790 INFO] - org.eclipse.om2m.binding.http.Activator 
+Register / context
+[2021-10-11 12:57:34,868 INFO] - org.eclipse.om2m.core.Activator 
+Starting CSE...
+[2021-10-11 12:57:34,880 INFO] - org.eclipse.om2m.core.Activator 
+Added Data Mapper Service: application/xml
+[2021-10-11 12:57:34,880 INFO] - org.eclipse.om2m.core.Activator 
+Added Data Mapper Service: application/json
+[2021-10-11 12:57:34,882 INFO] - org.eclipse.om2m.core.Activator 
+Rest client service discovered. Protocol: http
+[2021-10-11 12:57:34,882 INFO] - org.eclipse.om2m.core.Activator 
+Rest client service discovered. Protocol: https
+[2021-10-11 12:57:34,882 INFO] - org.eclipse.om2m.core.Activator 
+Rest client service discovered. Protocol: ws
+[2021-10-11 12:57:34,884 INFO] - org.eclipse.om2m.webapp.dashboard.Activator 
+HttpService discovered
+[2021-10-11 12:57:34,884 INFO] - org.eclipse.om2m.webapp.dashboard.Activator 
+Register /web http context
+[2021-10-11 12:57:34,890 INFO] - org.eclipse.om2m.webapp.resourcesbrowser.json.Activator 
+HttpService discovered
+[2021-10-11 12:57:34,890 INFO] - org.eclipse.om2m.webapp.resourcesbrowser.json.Activator 
+Register /webpage http context
+[2021-10-11 12:57:35,466 INFO] - org.eclipse.om2m.persistence.eclipselink.internal.DBServiceJPAImpl 
+DataBase initialized.
+[2021-10-11 12:57:35,480 INFO] - org.eclipse.om2m.persistence.eclipselink.Activator 
+Registering Database (JPA-EL) Service
+[2021-10-11 12:57:35,480 INFO] - org.eclipse.om2m.core.Activator 
+DataBase persistence service discovered
+[2021-10-11 12:57:35,482 INFO] - org.eclipse.om2m.core.thread.CoreExecutor 
+Creating thread pool with corePoolSize=10 & maximumSize=100
+[2021-10-11 12:57:35,484 INFO] - org.eclipse.om2m.core.CSEInitializer 
+Initializating the cseBase
+[2021-10-11 12:57:35,537 INFO] - org.eclipse.om2m.core.Activator 
+Registering CseService...
+[2021-10-11 12:57:35,546 INFO] - org.eclipse.om2m.binding.websocket.Activator 
+CseService discovered
+[2021-10-11 12:57:35,547 INFO] - org.eclipse.om2m.binding.http.Activator 
+CseService discovered
+[2021-10-11 12:57:35,547 INFO] - org.eclipse.om2m.core.Activator 
+CSE Started

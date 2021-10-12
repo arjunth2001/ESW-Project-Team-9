@@ -1,9 +1,9 @@
 #include <WiFi.h>
-const char *ssid = "Dlink3";
+const char *ssid = "Arjun";
 const char *password = "4872375050123";
 
 // CSE params
-const char *host = "192.168.0.2";
+const char *host = "192.168.92.144";
 const int httpPort = 8080;
 
 // AE params
@@ -143,5 +143,5 @@ void push()
 }
 void loop()
 {
-  //push();
+  push();
 }
