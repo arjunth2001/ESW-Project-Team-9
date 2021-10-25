@@ -42,11 +42,19 @@ GridEYE grideye;
 
 const int NUM_FRAMES_PRECALCULATION = 100;
 
+int TotalActivePoints = 0; // Feature 1
+int NumConnectedComponents = 0; // Feature 2
+int sizeLargestComponent = 0; // Feature 3
+
 float pre_calc_frames[NUM_FRAMES_PRECALCULATION+10][9][9];
 float B[9][9]; // Background -- Mean of NUM_FRAMES_PRECALCULATION frames with no occupancy
 float S[9][9]; // Standard deviation of each pixel in NUM_FRAMES_PRECALCULATION frames.
 float M[9][9]; // Current thermal values
 int F[9][9]; // Feature grid with active points
+
+int visited[9][9]; // Used for DFS
+int unique_components; // Number of connected components
+int component_size[64];
 
 void print_precalculate(int frame_num)
 {
@@ -155,6 +163,89 @@ void calculate_feature_grid()
     Serial.println();
 }
 
+
+void DFS(int row, int col, int component_num)
+{
+    if(row < 0 || row > 7 || col < 0 || col > 7){
+        return;
+    }
+    if(visited[row][col] != 0 || F[row][col] == 0){
+        return;
+    }
+    visited[row][col] = component_num;
+    DFS(row-1, col-1, component_num);
+    DFS(row-1, col, component_num);
+    DFS(row-1, col+1, component_num);
+    DFS(row, col-1, component_num);
+    DFS(row, col+1, component_num);
+    DFS(row+1, col-1, component_num);
+    DFS(row+1, col, component_num);
+    DFS(row+1, col+1, component_num);
+}
+
+void DFS_init()
+{
+    unique_components = 0;
+    for(int row = 0; row < 8; row++){
+        for(int col = 0; col < 8; col++){
+            visited[row][col] = 0;
+        }
+    }
+    for(int row = 0; row < 8; row++){
+        for(int col = 0; col < 8; col++){
+            if(visited[row][col] == 0 && F[row][col] == 1){
+                DFS(row, col, ++unique_components);
+            }
+        }
+    }
+}
+
+void find_size_largest_component()
+{
+    for(int i = 0; i < 64; i++){
+        component_size[i] = 0;
+    }
+    for(int row = 0; row < 8; row++){
+        for(int col = 0; col < 8; col++){
+            component_size[visited[row][col]]++;
+        }
+    }
+    sizeLargestComponent = 0;
+    for(int i = 1; i < 64; i++){ // Avoid zero
+        if(component_size[i] > sizeLargestComponent){
+            sizeLargestComponent = component_size[i];
+        }
+    }
+}
+
+void calculate_features()
+{
+    Serial.println("Calculating and printing extracted features.");
+    // Feature 1 - Total active points.
+    TotalActivePoints = 0;
+    for(int row = 0; row < 8; row++){
+        for(int col = 0; col < 8; col++){
+            TotalActivePoints += F[row][col];
+        }
+    }
+    Serial.print("Feature 1 - Total active points: ");
+    Serial.println(TotalActivePoints);
+
+    // Feature 2 - Number of connected components
+    // Using DFS
+    DFS_init();
+    NumConnectedComponents = unique_components;
+
+    // Feature 3 - Size of largest component
+    find_size_largest_component();
+
+    Serial.print("Feature 2 - Number of connected components: ");
+    Serial.println(NumConnectedComponents);
+    Serial.print("Feature 3 - Size of largest connected component(s): ");
+    Serial.println(sizeLargestComponent);
+
+}
+
 void setup() {
 
   // Start your preferred I2C object 
@@ -210,7 +301,7 @@ void loop() {
 
     calculate_feature_grid();
 
-
+    calculate_features();
 
 
   // End each frame with a linefeed
