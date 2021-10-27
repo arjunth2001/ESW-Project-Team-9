@@ -58,13 +58,15 @@ WiFiServer server(aePort);
 
 GridEYE grideye;
 
-const int NUM_FRAMES_PRECALCULATION = 600;
+const int NUM_FRAMES_PRECALCULATION = 250; 
+// >= 258 Frames aren't supported because of stack overflow. (Found using binary search)
+// So taking 250 to be safe.
 
 int TotalActivePoints = 0; // Feature 1
 int NumConnectedComponents = 0; // Feature 2
 int sizeLargestComponent = 0; // Feature 3
 
-float pre_calc_frames[NUM_FRAMES_PRECALCULATION+10][9][9];
+float pre_calc_frames[NUM_FRAMES_PRECALCULATION+1][9][9];
 float B[9][9]; // Background -- Mean of NUM_FRAMES_PRECALCULATION frames with no occupancy
 float S[9][9]; // Standard deviation of each pixel in NUM_FRAMES_PRECALCULATION frames.
 float M[9][9]; // Current thermal values
@@ -301,25 +303,11 @@ void setup() {
   if (resulat == "HTTP/1.1 201 Created")
   {
     // Create Container resource
-    send("/server/nirmal", 3, "{\"m2m:cnt\":{\"rn\":\"pir\"}}");
+    send("/server/nirmal", 3, "{\"m2m:cnt\":{\"rn\":\"grid_eye\"}}");
     // Create ContentInstance resource
-    send("/server/nirmal/pir", 4, "{\"m2m:cin\":{\"con\":\"0\"}}");
+    send("/server/nirmal/grid_eye", 4, "{\"m2m:cin\":{\"con\":\"0\"}}");
     // Create Subscription resource
-    send("/server/nirmal/pir", 23, "{\"m2m:sub\":{\"rn\":\"pir_sub\",\"nu\":[\"Cae_nirmal\"],\"nct\":1}}");
-
-    // Create Container resource
-    send("/server/nirmal", 3, "{\"m2m:cnt\":{\"rn\":\"pir\"}}");
-    // Create ContentInstance resource
-    send("/server/nirmal/pir", 4, "{\"m2m:cin\":{\"con\":\"0\"}}");
-    // Create Subscription resource
-    send("/server/nirmal/pir", 23, "{\"m2m:sub\":{\"rn\":\"pir_sub\",\"nu\":[\"Cae_nirmal\"],\"nct\":1}}");
-
-    // Create Container resource
-    send("/server/nirmal", 3, "{\"m2m:cnt\":{\"rn\":\"pir\"}}");
-    // Create ContentInstance resource
-    send("/server/nirmal/pir", 4, "{\"m2m:cin\":{\"con\":\"0\"}}");
-    // Create Subscription resource
-    send("/server/nirmal/pir", 23, "{\"m2m:sub\":{\"rn\":\"pir_sub\",\"nu\":[\"Cae_nirmal\"],\"nct\":1}}");
+    send("/server/nirmal/grid_eye", 23, "{\"m2m:sub\":{\"rn\":\"grid_eye_sub\",\"nu\":[\"Cae_nirmal\"],\"nct\":1}}");
   }
   else
   {
@@ -327,8 +315,6 @@ void setup() {
     Serial.println("Error: ");
     Serial.println(resulat);
   }
-
-
 
   // Grid eye related
   for(int calc_iter = 0; calc_iter < NUM_FRAMES_PRECALCULATION; calc_iter++)
@@ -412,21 +398,12 @@ String send(String url, int ty, String rep)
 
 void push()
 {
-  int motion = digitalRead(12);
-  if (motion)
-  {
-    Serial.println("Motion detected");
-    digitalWrite(15, HIGH);
-  }
-  else
-  {
-    Serial.println("===nothing moves");
-    digitalWrite(15, LOW);
-  }
-//  delay(500);/
+  Serial.println("Pushing data to OM2M");
+  Serial.println("**************************************");
+  // Format to send: Feature1,Feature2,Feature3
   delay(500);
-  String data = String() + "{\"m2m:cin\":{\"con\":\"" + motion + "\"}}";
-  send("/server/nirmal/pir", 4, data);
+  String data = String() + "{\"m2m:cin\":{\"con\":\"" + TotalActivePoints + "," + NumConnectedComponents + "," + sizeLargestComponent + "\"}}";
+  send("/server/nirmal/grid_eye", 4, data);
 }
 
 void loop() {
@@ -462,7 +439,7 @@ void loop() {
   Serial.println("-------------------------------------");
   Serial.println();
   Serial.println("**************************************");
-
+  push(); // Pushing data to OM2M
   // Give Processing time to chew
   delay(100); // This is okay delay
 
