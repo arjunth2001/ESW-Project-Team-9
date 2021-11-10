@@ -36,7 +36,7 @@
 #include <Wire.h>
 #include <SparkFun_GridEYE_Arduino_Library.h>
 #include <cmath>
-
+#include "HTTPClient.h"
 
 // OneM2M related
 #include <WiFi.h>
@@ -53,6 +53,31 @@ const char *origin = "Cae_nirmal";
 
 
 WiFiServer server(aePort);
+
+// ESP-Cam communication
+
+const char* esp_cam_capture_address = "http://192.168.43.100/capture";
+
+int unique_id = 10000; // Starts from 10000
+
+String uint64ToString(uint64_t input) {
+  String result = "";
+  uint8_t base = 10;
+
+  do {
+    char c = input % base;
+    input /= base;
+
+    if (c < 10)
+      c +='0';
+    else
+      c += 'A' - 10;
+    result = c + result;
+  } while (input);
+  return result;
+}
+// WiFiClient client;
+HTTPClient http;
 
 // Grid eye related 
 
@@ -418,7 +443,15 @@ void loop() {
 //     Serial.print(grideye.getPixelTemperature(i));
 //     Serial.print(",");
 //   } 
+  WiFiClient client;
+  http.begin(client, esp_cam_capture_address);
+  int httpResponseCode = http.POST(uint64ToString(unique_id++));
+  Serial.print("HTTP Response code: ");
+  Serial.println(httpResponseCode);
 
+  // Free resources
+  http.end();
+  
     int row = 0;
     int col = 0;
     for(unsigned char i = 0; i < 64; i++){
@@ -441,7 +474,7 @@ void loop() {
   Serial.println("**************************************");
   push(); // Pushing data to OM2M
   // Give Processing time to chew
-  delay(100); // This is okay delay
+  delay(10000); // This is okay delay
 
   // Extra delay for testing
 //   delay(20000);
