@@ -38,6 +38,10 @@
 #include <cmath>
 #include "HTTPClient.h"
 
+// Timestamp
+#include "time.h"
+
+
 // OneM2M related
 #include <WiFi.h>
 #include "secret.h"
@@ -54,7 +58,15 @@ const char *origin = "Cae_nirmal";
 
 WiFiServer server(aePort);
 
+// Timestamp
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = 0;   //Replace with your GMT offset (seconds)
+const int   daylightOffset_sec = 0;  //Replace with your daylight offset (seconds)
+
+
 // ESP-Cam communication
+
+
 
 const char* esp_cam_capture_address = "http://192.168.43.100/capture";
 
@@ -318,6 +330,9 @@ void setup() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  // printLocalTime();
+
   // Start HTTP server
   server.begin();
   Serial.println("Server started");
@@ -425,9 +440,15 @@ void push()
 {
   Serial.println("Pushing data to OM2M");
   Serial.println("**************************************");
+
+
+  struct tm timeinfo;
+  getLocalTime(&timeinfo);
+  String time_stamp = String() + timeinfo.tm_mon + "-" + timeinfo.tm_mday + "-" + timeinfo.tm_hour + "-" + timeinfo.tm_min + "-" + timeinfo.tm_sec;
+
   // Format to send: Feature1,Feature2,Feature3
   delay(500);
-  String data = String() + "{\"m2m:cin\":{\"con\":\"" + TotalActivePoints + "," + NumConnectedComponents + "," + sizeLargestComponent + "\"}}";
+  String data = String() + "{\"m2m:cin\":{\"con\":\"" + unique_id + "," + TotalActivePoints + "," + NumConnectedComponents + "," + sizeLargestComponent + "," + time_stamp + "\"}}";
   send("/server/nirmal/grid_eye", 4, data);
 }
 
@@ -445,7 +466,7 @@ void loop() {
 //   } 
   WiFiClient client;
   http.begin(client, esp_cam_capture_address);
-  int httpResponseCode = http.POST(uint64ToString(unique_id++));
+  int httpResponseCode = http.POST(uint64ToString(unique_id));
   Serial.print("HTTP Response code: ");
   Serial.println(httpResponseCode);
 
@@ -478,5 +499,5 @@ void loop() {
 
   // Extra delay for testing
 //   delay(20000);
-
+  unique_id++;
 }
