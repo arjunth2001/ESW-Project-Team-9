@@ -51,6 +51,7 @@ const String server = "https://" + cse_ip + "/~/in-cse/in-name/Team-9";
 // Encryption
 #include "AES.h"
 #include "Base64.h"
+#include "mbedtls/md.h"
 
 AES aes;
 
@@ -83,6 +84,37 @@ String encrypt(String msg) {
     base64_encode(b64data, (char *)cipher, aes.get_size() );
     Serial.println ("Encrypted data in base64: " + String(b64data) );
     return String(b64data);
+}
+
+String hash(String payload0) {
+  char *key = "ESWTEAM9";
+  char payload[32];
+  payload0.toCharArray(payload, 32);
+  byte hmacResult[32];
+
+  mbedtls_md_context_t ctx;
+  mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
+
+  const size_t payloadLength = strlen(payload);
+  const size_t keyLength = strlen(key);
+
+  mbedtls_md_init(&ctx);
+  mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(md_type), 1);
+  mbedtls_md_hmac_starts(&ctx, (const unsigned char *) key, keyLength);
+  mbedtls_md_hmac_update(&ctx, (const unsigned char *) payload, payloadLength);
+  mbedtls_md_hmac_finish(&ctx, hmacResult);
+  mbedtls_md_free(&ctx);
+
+  Serial.print("Hash: ");
+  String final_hash = "";
+
+  for(int i= 0; i< sizeof(hmacResult); i++) {
+      char str[3];
+      sprintf(str, "%02x", (int)hmacResult[i]);
+      final_hash += str;
+  }
+  Serial.print(final_hash);
+  return final_hash;
 }
 
 // Timestamp
@@ -381,7 +413,8 @@ void setup() {
 
 String send(String url, int ty, String rep)
 {
-
+  Serial.println("TO SEND");
+  Serial.println(rep);
   HTTPClient http;
   http.begin(url);
   http.addHeader("X-M2M-Origin", "rTI9uxe@NN:7rn5sOIaYf");
@@ -406,7 +439,10 @@ void push()
   String time_stamp = String() + timeinfo.tm_mon + "-" + timeinfo.tm_mday + "-" + timeinfo.tm_hour + "-" + timeinfo.tm_min + "-" + timeinfo.tm_sec;
   String info_to_send = String() +  unique_id + "," + TotalActivePoints + "," + NumConnectedComponents + "," + sizeLargestComponent + "," + time_stamp; 
   
+  // info_to_send = encrypt(info_to_send);
+  String info_hash = hash(info_to_send);
   info_to_send = encrypt(info_to_send);
+  info_to_send = info_to_send + "," + info_hash;
   // Format to send: Unique_ID,Feature1,Feature2,Feature3,TimeStamp
   // delay(500);
   String data = String() + "{\"m2m:cin\":{\"con\":\"" + info_to_send + "\"}}";
