@@ -1,14 +1,17 @@
 #include <WiFi.h>
-const char *ssid = "Arjun";
-const char *password = "4872375050123";
+// const char *ssid = "Arjun";
+const char *ssid = "Redmi";
+// const char *password = "4872375050123";
+const char *password = "candid24x7";
 
 // CSE params
-const char *host = "192.168.92.144";
+// const char *host = "192.168.92.144";
+const char *host = "192.168.43.142";
 const int httpPort = 8080;
 
 // AE params
 const int aePort = 80;
-const char *origin = "Cae_arjun";
+const char *origin = "Cae_gokul";
 ///////////////////////////////////////////
 
 WiFiServer server(aePort);
@@ -16,8 +19,8 @@ WiFiServer server(aePort);
 void setup()
 {
   Serial.begin(9600);  // setup Serial Monitor to display information
-  pinMode(12, INPUT);  // Input from sensor
-  pinMode(15, OUTPUT); // OUTPUT to alarm or LED
+  pinMode(2, INPUT);  // Input from sensor
+  pinMode(13, OUTPUT); // OUTPUT to alarm or LED
   delay(10);
 
   Serial.println();
@@ -46,17 +49,17 @@ void setup()
   Serial.println("Server started");
 
   // Create AE resource
-  String resulat = send("/server", 2, "{\"m2m:ae\":{\"rn\":\"arjun\",\"api\":\"arjun.esw.com\",\"rr\":\"true\",\"poa\":[\"http://" + WiFi.localIP().toString() + ":" + aePort + "\"]}}");
+  String resulat = send("/server", 2, "{\"m2m:ae\":{\"rn\":\"gokul\",\"api\":\"gokul.esw.com\",\"rr\":\"true\",\"poa\":[\"http://" + WiFi.localIP().toString() + ":" + aePort + "\"]}}");
 
   if (resulat == "HTTP/1.1 201 Created")
   {
     // Create Container resource
-    send("/server/arjun", 3, "{\"m2m:cnt\":{\"rn\":\"pir\"}}");
+    send("/server/gokul", 3, "{\"m2m:cnt\":{\"rn\":\"pir\"}}");
 
     // Create ContentInstance resource
-    send("/server/arjun/pir", 4, "{\"m2m:cin\":{\"con\":\"0\"}}");
+    send("/server/gokul/pir", 4, "{\"m2m:cin\":{\"con\":\"0\"}}");
     // Create Subscription resource
-    send("/server/arjun/pir", 23, "{\"m2m:sub\":{\"rn\":\"pir_sub\",\"nu\":[\"Cae_arjun\"],\"nct\":1}}");
+    send("/server/gokul/pir", 23, "{\"m2m:sub\":{\"rn\":\"pir_sub\",\"nu\":[\"Cae_gokul\"],\"nct\":1}}");
   }
   else
   {
@@ -126,20 +129,20 @@ String send(String url, int ty, String rep)
 
 void push()
 {
-  int motion = digitalRead(12);
+  int motion = digitalRead(2);
   if (motion)
   {
     Serial.println("Motion detected");
-    digitalWrite(15, HIGH);
+    digitalWrite(13, HIGH);
   }
   else
   {
     Serial.println("===nothing moves");
-    digitalWrite(15, LOW);
+    digitalWrite(13, LOW);
   }
   delay(500);
   String data = String() + "{\"m2m:cin\":{\"con\":\"" + motion + "\"}}";
-  send("/server/arjun/pir", 4, data);
+  send("/server/gokul/pir", 4, data);
 }
 void loop()
 {

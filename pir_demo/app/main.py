@@ -90,7 +90,7 @@ def main():
             'http://0.0.0.0:8080/', 'Cae-admin')
         st.session_state.cse = CSEBase(st.session_state.session, 'server')
         st.session_state.ae = AE(
-            st.session_state.cse, resourceName='arjun')
+            st.session_state.cse, resourceName='gokul')
         st.session_state.pir = st.session_state.ae.containers()[0]
         st.session_state.notifs = NOT.setupNotifications(callback)
         st.session_state.pir_subscription = st.session_state.pir.subscribe()
@@ -157,7 +157,7 @@ def main():
             with c2:
                 st.markdown("### Occupancy")
                 fig, ax = plt.subplots()
-                fig.patch.set_facecolor('#EAE7DC')
+                fig.patch.set_facecolor('#eadedc')
                 ax = plt.plot(st.session_state.x, st.session_state.y)
                 st.pyplot(fig)
             with c3:
