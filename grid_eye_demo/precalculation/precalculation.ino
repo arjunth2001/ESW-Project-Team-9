@@ -60,7 +60,7 @@ WiFiServer server(aePort);
 
 // Timestamp
 const char* ntpServer = "pool.ntp.org";
-const long  gmtOffset_sec = 0;   //Replace with your GMT offset (seconds)
+const long  gmtOffset_sec = 19800;   //Replace with your GMT offset (seconds)
 const int   daylightOffset_sec = 0;  //Replace with your daylight offset (seconds)
 
 
@@ -70,7 +70,7 @@ const int   daylightOffset_sec = 0;  //Replace with your daylight offset (second
 
 const char* esp_cam_capture_address = "http://192.168.43.100/capture";
 
-int unique_id = 10000; // Starts from 10000
+int unique_id = 10000000; // Starts from 10000
 
 String uint64ToString(uint64_t input) {
   String result = "";
