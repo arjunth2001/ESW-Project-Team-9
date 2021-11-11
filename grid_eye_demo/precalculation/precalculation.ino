@@ -46,6 +46,43 @@
 #include <WiFi.h>
 #include "secret.h"
 
+// Encryption
+#include "AES.h"
+#include "Base64.h"
+
+AES aes;
+
+char b64data[200];
+byte cipher[1000];
+byte iv [N_BLOCK] ;
+byte key[] = { 0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x15, 0x88, 0x09, 0xCF, 0x4F, 0x3C };
+byte my_iv[N_BLOCK] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+
+uint8_t getrnd() {
+    uint8_t really_random = *(volatile uint8_t *)0x3FF20E44;
+    return really_random;
+}
+
+// Generate a random initialization vector
+void gen_iv(byte  *iv) {
+    for (int i = 0 ; i < N_BLOCK ; i++ ) {
+        iv[i]= (byte) getrnd();
+    }
+}
+
+String encrypt(String msg) {
+    aes.set_key( key , sizeof(key));  
+    gen_iv( my_iv );
+    base64_encode( b64data, (char *)my_iv, N_BLOCK);
+    Serial.println(" IV b64: " + String(b64data));
+    int b64len = base64_encode(b64data, (char *)msg.c_str(),msg.length());
+    aes.do_aes_encrypt((byte *)b64data, b64len , cipher, key, 128, my_iv);
+    base64_encode(b64data, (char *)cipher, aes.get_size() );
+    Serial.println ("Encrypted data in base64: " + String(b64data) );
+    return String(b64data);
+}
+
 // CSE params
 const char *host = "192.168.43.85";
 const int httpPort = 8080;
@@ -445,10 +482,12 @@ void push()
   struct tm timeinfo;
   getLocalTime(&timeinfo);
   String time_stamp = String() + timeinfo.tm_mon + "-" + timeinfo.tm_mday + "-" + timeinfo.tm_hour + "-" + timeinfo.tm_min + "-" + timeinfo.tm_sec;
-
-  // Format to send: Feature1,Feature2,Feature3
+  String info_to_send = String() +  unique_id + "," + TotalActivePoints + "," + NumConnectedComponents + "," + sizeLargestComponent + "," + time_stamp; 
+  
+  info_to_send = encrypt(info_to_send);
+  // Format to send: Unique_ID,Feature1,Feature2,Feature3,TimeStamp
   delay(500);
-  String data = String() + "{\"m2m:cin\":{\"con\":\"" + unique_id + "," + TotalActivePoints + "," + NumConnectedComponents + "," + sizeLargestComponent + "," + time_stamp + "\"}}";
+  String data = String() + "{\"m2m:cin\":{\"con\":\"" + info_to_send + "\"}}";
   send("/server/nirmal/grid_eye", 4, data);
 }
 
