@@ -1,12 +1,12 @@
 #include <WiFi.h>
-// const char *ssid = "Arjun";
-const char *ssid = "Redmi";
-// const char *password = "4872375050123";
-const char *password = "candid24x7";
+const char *ssid = "Arjun";
+//const char *ssid = "Redmi";
+const char *password = "4872375050123";
+//const char *password = "candid24x7";
 
 // CSE params
 // const char *host = "192.168.92.144";
-const char *host = "192.168.43.142";
+const char *host = "192.168.209.144";
 const int httpPort = 8080;
 
 // AE params
@@ -19,8 +19,8 @@ WiFiServer server(aePort);
 void setup()
 {
   Serial.begin(9600);  // setup Serial Monitor to display information
-  pinMode(2, INPUT);  // Input from sensor
-  pinMode(13, OUTPUT); // OUTPUT to alarm or LED
+  pinMode(12, INPUT);  // Input from sensor
+  pinMode(15, OUTPUT); // OUTPUT to alarm or LED
   delay(10);
 
   Serial.println();
@@ -129,16 +129,16 @@ String send(String url, int ty, String rep)
 
 void push()
 {
-  int motion = digitalRead(2);
+  int motion = digitalRead(12);
   if (motion)
   {
     Serial.println("Motion detected");
-    digitalWrite(13, HIGH);
+    digitalWrite(15, HIGH);
   }
   else
   {
     Serial.println("===nothing moves");
-    digitalWrite(13, LOW);
+    digitalWrite(15, LOW);
   }
   delay(500);
   String data = String() + "{\"m2m:cin\":{\"con\":\"" + motion + "\"}}";
