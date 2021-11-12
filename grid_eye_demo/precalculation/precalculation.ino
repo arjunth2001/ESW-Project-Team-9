@@ -340,6 +340,17 @@ void calculate_features()
 
 }
 
+String grid_in_string()
+{
+  String grid_string = "0000000000000000000000000000000000000000000000000000000000000000";
+  for(int i = 0; i < 64; i++){
+    int row = i/8;
+    int col = i%8;
+    grid_string[i] = F[row][col] == 1? '1' : '0';
+  }
+  return grid_string;
+}
+
 void setup() {
 
   // Start your preferred I2C object 
@@ -482,7 +493,12 @@ void push()
   struct tm timeinfo;
   getLocalTime(&timeinfo);
   String time_stamp = String() + timeinfo.tm_mon + "-" + timeinfo.tm_mday + "-" + timeinfo.tm_hour + "-" + timeinfo.tm_min + "-" + timeinfo.tm_sec;
-  String info_to_send = String() +  unique_id + "," + TotalActivePoints + "," + NumConnectedComponents + "," + sizeLargestComponent + "," + time_stamp; 
+
+  String grid_string = grid_in_string();
+  String info_to_send = String() +  unique_id + "," + TotalActivePoints + "," + NumConnectedComponents + "," + sizeLargestComponent + "," + grid_string + "," + time_stamp; 
+  
+  Serial.print("INFO to send:");
+  Serial.println(info_to_send);
   
   info_to_send = encrypt(info_to_send);
   // Format to send: Unique_ID,Feature1,Feature2,Feature3,TimeStamp
@@ -534,8 +550,8 @@ void loop() {
   Serial.println("**************************************");
   push(); // Pushing data to OM2M
   // Give Processing time to chew
-  delay(10000); // This is okay delay
-
+  // delay(10000); // This is okay delay
+  delay(3000);
   // Extra delay for testing
 //   delay(20000);
   unique_id++;
