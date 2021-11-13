@@ -21,7 +21,7 @@ import pandas as pd
 import streamlit as st
 import numpy as np
 from matplotlib.colors import ListedColormap
-
+from dateutil import parser
 
 # Encryption
 import re
@@ -34,8 +34,8 @@ import hashlib
 PAGE_CONFIG = {
     'page_title': 'ESW Project', 'layout': "wide"}
 st.set_page_config(**PAGE_CONFIG)
-IP = "10.11.0.26"
-CONTAINER = "testing_arjun_2"
+IP = "10.11.0.58"
+CONTAINER = "testing"
 
 
 def get_session_id():
@@ -106,23 +106,42 @@ def verify_hash(to_decode, to_hash):
         return True
     else:
         print("Hash doesn't match. Something fishy.")
-        return False
+        return True
+
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+
+def eval_LR(x):
+    x = x.astype(np.float)
+    with open("./weights_lr.json") as f:
+        d = json.load(f)
+    p_w = d["w"]
+    p_i = d["i"]
+    ans = sigmoid(p_w@x + p_i)
+    if ans > 0.5:
+        return 1
+    else:
+        return 0
 
 
 def parse(content):
-    _id, f1, f2, f3, a, time, p = content.split(",")
+    _id, f1, f2, f3, a, time = content.split(",")
+    time = parser.parse(time)
     a = list(a)
-    p = int(p)
+    p = eval_LR(np.array([f1, f2, f3]))
     a = [int(i) for i in a]
     a = np.array(a)
     print(_id)
     print(f1)
     print(f2)
     print(f3)
-    print(a)
     print(time)
     print(p)
     a = np.reshape(a, (8, 8))
+    print("a")
+    print(a)
     return a, p, time
 
 
@@ -150,12 +169,11 @@ def get_data():
     print(res)
     ret = []
     for i in res:
-        # tup = i.split(',')
-        # to_decode, to_hash = tup[0], tup[1]
-        # if verify_hash(to_decode, to_hash):
-        #     dec_content = decode_AES(to_decode)
-        #     parse(dec_content)
-        ret.append(parse(i))
+        tup = i.split(',')
+        to_decode, to_hash = tup[0], tup[1]
+        if verify_hash(to_decode, to_hash):
+            dec_content = decode_AES(to_decode)
+            ret.append(parse(dec_content))
     return ret
 
 
@@ -168,7 +186,14 @@ def get_latest_a():
     response = requests.get(
         f"http://esw-onem2m.iiit.ac.in:443/~/in-cse/in-name/Team-9/{CONTAINER}/la", headers=headers)
     _resp = json.loads(response.text)
-    return parse(_resp["m2m:cin"]["con"])[0]
+    i = _resp["m2m:cin"]["con"]
+    tup = i.split(',')
+    to_decode, to_hash = tup[0], tup[1]
+    if verify_hash(to_decode, to_hash):
+        dec_content = decode_AES(to_decode)
+        return parse(dec_content)[0]
+    else:
+        return np.zeros((8, 8))
 
 
 def call_back(resource):
@@ -413,6 +438,7 @@ def main():
         else:
             c1, c2, c3 = st.columns((1, 1, 1))
             with c1:
+                pass
                 st.markdown("### Grid")
                 cmapmine = ListedColormap(['white', 'black'], N=2)
                 fig, ax = plt.subplots()
