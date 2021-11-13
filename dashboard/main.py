@@ -14,7 +14,7 @@ import onem2mlib.constants as CON
 import onem2mlib.internal as INT
 import requests
 import uuid
-
+import matplotlib
 import matplotlib.pylab as plt
 import extra_streamlit_components as stx
 import pandas as pd
@@ -191,9 +191,9 @@ def get_latest_a():
     to_decode, to_hash = tup[0], tup[1]
     if verify_hash(to_decode, to_hash):
         dec_content = decode_AES(to_decode)
-        return parse(dec_content)[0]
+        return parse(dec_content)
     else:
-        return np.zeros((8, 8))
+        return np.zeros((8, 8)), 0, 0
 
 
 def call_back(resource):
@@ -373,14 +373,18 @@ def main():
             subscribe()
         except:
             pass
-    st.session_state.grid = np.zeros((8, 8))
-    st.session_state.x = [0]
-    st.session_state.y = [0]
-    data = get_data()
-    if len(data) != 0:
-        st.session_state.x = [i[2] for i in data]
-        st.session_state.y = [i[1] for i in data]
-        st.session_state.grid = get_latest_a()
+    if 'x' not in st.session_state:
+        a, p, t = get_latest_a()
+        st.session_state.grid = a
+        st.session_state.x = [t]
+        st.session_state.y = [p]
+    else:
+        a, p, t = get_latest_a()
+        st.session_state.grid = a
+        st.session_state.x.append(t)
+        st.session_state.y.append(p)
+        if len(st.session_state.x) >= 4:
+            st.session_state.x = st.session_state.x[1:]
 
     st.title("ESW Project Team 9")
     if auth_state().user == None:
@@ -452,7 +456,8 @@ def main():
                 st.markdown("### Occupancy")
                 fig, ax = plt.subplots()
                 fig.patch.set_facecolor('#EAE7DC')
-                ax = plt.plot(st.session_state.x, st.session_state.y)
+                dates = matplotlib.dates.date2num(st.session_state.x)
+                ax = plt.plot(dates, st.session_state.y)
                 st.pyplot(fig)
 
             with c3:
