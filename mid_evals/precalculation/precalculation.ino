@@ -40,7 +40,14 @@
 
 // Timestamp
 #include "time.h"
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+// Define NTP Client to get time
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP);
 
+// Variables to save date and time
+String formattedDate;
 
 // OneM2M related
 #include <WiFi.h>
@@ -117,10 +124,10 @@ String hash(String payload0) {
   return final_hash;
 }
 
-// Timestamp
-const char* ntpServer = "pool.ntp.org";
-const long  gmtOffset_sec = 19800;   //Replace with your GMT offset (seconds)
-const int   daylightOffset_sec = 0;  //Replace with your daylight offset (seconds)
+// // Timestamp
+// const char* ntpServer = "pool.ntp.org";
+// const long  gmtOffset_sec = 19800;   //Replace with your GMT offset (seconds)
+// const int   daylightOffset_sec = 0;  //Replace with your daylight offset (seconds)
 
 
 // ESP-Cam communication
@@ -160,11 +167,12 @@ int TotalActivePoints = 0; // Feature 1
 int NumConnectedComponents = 0; // Feature 2
 int sizeLargestComponent = 0; // Feature 3
 
-float pre_calc_frames[NUM_FRAMES_PRECALCULATION+1][9][9];
-float B[9][9]; // Background -- Mean of NUM_FRAMES_PRECALCULATION frames with no occupancy
-float S[9][9]; // Standard deviation of each pixel in NUM_FRAMES_PRECALCULATION frames.
-float M[9][9]; // Current thermal values
-int F[9][9]; // Feature grid with active points
+const int MAT_DIM = 8;
+float pre_calc_frames[NUM_FRAMES_PRECALCULATION+1][MAT_DIM][MAT_DIM];
+float B[MAT_DIM][MAT_DIM]; // Background -- Mean of NUM_FRAMES_PRECALCULATION frames with no occupancy
+float S[MAT_DIM][MAT_DIM]; // Standard deviation of each pixel in NUM_FRAMES_PRECALCULATION frames.
+float M[MAT_DIM][MAT_DIM]; // Current thermal values
+int F[MAT_DIM][MAT_DIM]; // Feature grid with active points
 
 int visited[9][9]; // Used for DFS
 int unique_components; // Number of connected components
@@ -399,7 +407,8 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   // Fetching time from web. Indian Standard Time.
-  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  timeClient.begin();
+  timeClient.setTimeOffset(19800);
 
   // Grid eye related
   for(int calc_iter = 0; calc_iter < NUM_FRAMES_PRECALCULATION; calc_iter++)
@@ -445,9 +454,10 @@ void push()
   Serial.println("**************************************");
 
   // Timestamp
-  struct tm timeinfo;
-  getLocalTime(&timeinfo);
-  String time_stamp = String() + timeinfo.tm_mon + "-" + timeinfo.tm_mday + "-" + timeinfo.tm_hour + "-" + timeinfo.tm_min + "-" + timeinfo.tm_sec;
+  while(!timeClient.update()) {
+    timeClient.forceUpdate();
+  }
+  String time_stamp = timeClient.getFormattedDate();
   String grid_string = grid_in_string();
   String info_to_send = String() +  unique_id + "," + TotalActivePoints + "," + NumConnectedComponents + "," + sizeLargestComponent + "," + grid_string + "," + time_stamp; 
   
