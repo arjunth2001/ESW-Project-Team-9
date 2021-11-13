@@ -360,6 +360,17 @@ void calculate_features()
 
 }
 
+String grid_in_string()
+{
+  String grid_string = "0000000000000000000000000000000000000000000000000000000000000000";
+  for(int i = 0; i < 64; i++){
+    int row = i/8;
+    int col = i%8;
+    grid_string[i] = F[row][col] == 1? '1' : '0';
+  }
+  return grid_string;
+}
+
 void setup() {
 
   // Start your preferred I2C object 
@@ -437,7 +448,8 @@ void push()
   struct tm timeinfo;
   getLocalTime(&timeinfo);
   String time_stamp = String() + timeinfo.tm_mon + "-" + timeinfo.tm_mday + "-" + timeinfo.tm_hour + "-" + timeinfo.tm_min + "-" + timeinfo.tm_sec;
-  String info_to_send = String() +  unique_id + "," + TotalActivePoints + "," + NumConnectedComponents + "," + sizeLargestComponent + "," + time_stamp; 
+  String grid_string = grid_in_string();
+  String info_to_send = String() +  unique_id + "," + TotalActivePoints + "," + NumConnectedComponents + "," + sizeLargestComponent + "," + grid_string + "," + time_stamp; 
   
   // info_to_send = encrypt(info_to_send);
   String info_hash = hash(info_to_send);
@@ -504,6 +516,6 @@ void loop() {
   Serial.println();
   Serial.println("**************************************");
   push(); // Pushing data to OM2M
-  delay(10000); // Delay of 10 seconds during dataset creation
+  delay(5000); // Delay of 5 seconds to detect occupancy
   unique_id++;
 }
