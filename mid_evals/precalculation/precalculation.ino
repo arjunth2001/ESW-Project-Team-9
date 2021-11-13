@@ -95,13 +95,14 @@ String encrypt(String msg) {
 
 String hash(String payload0) {
   char *key = "ESWTEAM9";
-  char payload[32];
-  payload0.toCharArray(payload, 32);
+  int mainmsg_len = payload0.length()+1;
+  char payload[mainmsg_len];
+  payload0.toCharArray(payload, mainmsg_len);
   byte hmacResult[32];
 
   mbedtls_md_context_t ctx;
   mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
-
+  Serial.println(payload0.length());
   const size_t payloadLength = strlen(payload);
   const size_t keyLength = strlen(key);
 
