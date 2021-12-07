@@ -64,6 +64,8 @@ int feature_history[FEATURE_HISTORY_NUM][3];
 
 // Occupancy
 int global_occupancy;
+const int redLed = 2; // D2
+const int greenLed = 4; // D4
 
 // Encryption
 #include "AES.h"
@@ -432,6 +434,8 @@ String grid_in_string()
 void setup()
 {
 
+  pinMode(greenLed, OUTPUT);
+  pinMode(redLed, OUTPUT);
   // Start your preferred I2C object
   Wire.begin();
   // Library assumes "Wire" for I2C but you can pass something else with begin() if you like
@@ -612,14 +616,19 @@ void loop()
   }
   global_occupancy = predict_occupancy();
 
+  // Light LEDs
+  if(global_occupancy){
+    digitalWrite(redLed, HIGH);
+    digitalWrite(greenLed, LOW);
+  }else{
+    digitalWrite(redLed, LOW);
+    digitalWrite(greenLed, HIGH);
+  }
   
-
-  // End each frame with a linefeed
-  Serial.println();
   Serial.println("-------------------------------------");
   Serial.println();
   Serial.println("**************************************");
   push();      // Pushing data to OM2M
-  delay(3000); // Delay of 5 seconds to detect occupancy
+  delay(500); // Delay of 0.5 seconds
   unique_id++;
 }
