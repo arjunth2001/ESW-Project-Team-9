@@ -56,7 +56,7 @@ const String cse_ip = "esw-onem2m.iiit.ac.in";
 const String server = "https://" + cse_ip + "/~/in-cse/in-name/Team-9";
 
 // Features
-const int FEATURE_HISTORY_NUM = 3;
+const int FEATURE_HISTORY_NUM = 6;
 int global_feature1 = 0;
 int global_feature2 = 0;
 int global_feature3 = 0;
@@ -66,6 +66,8 @@ int feature_history[FEATURE_HISTORY_NUM][3];
 int global_occupancy;
 const int redLed = 16; // D2
 const int greenLed = 17; // D4
+
+unsigned long time_last_bg_update;
 
 // Encryption
 #include "AES.h"
@@ -485,6 +487,8 @@ void setup()
   }
   calculate_background_frame();   // Calculating B.
   calculate_standard_deviation(); // Calculating S.
+
+  time_last_bg_update = millis(); // Would be valid for 50 days.
 }
 
 String send(String url, int ty, String rep)
@@ -543,8 +547,41 @@ int predict_occupancy(){
   }
 }
 
+
+void update_background(){
+    int row, col;
+    for (unsigned char i = 0; i < 64; i++)
+    {
+      row = i / 8;
+      col = i % 8;
+      M[row][col] = grideye.getPixelTemperature(i);
+    }
+    double sum_temp = 0.0;
+    double num_temp = 0.0;
+    for(row = 0; row < 8; row++){
+      for(col = 0; col < 8; col++){
+        if(abs(M[row][col]-B[row][col]) < 1.5 * S[row][col]){
+          num_temp += 1.0;
+          sum_temp = sum_temp + (M[row][col]/B[row][col]);
+        }
+      }
+    }
+    sum_temp = sum_temp / num_temp; // Scale
+    float alpha = 0.2;
+    for(row = 0; row < 8; row++){
+      for(col = 0; col < 8; col++){
+        M[row][col] = B[row][col] * sum_temp; // Scaled BG Pixel
+        B[row][col] = alpha * M[row][col] + (1.0-alpha) * B[row][col];
+      }
+    }
+}                                                             
+
 void loop()
 {
+  if(millis()-time_last_bg_update > 60000 * 10){ // 10 minutes
+    time_last_bg_update = millis();
+    update_background();
+  }
   if (WiFi.status() != WL_CONNECTED)
   {
     WiFi.begin(ssid, password);
