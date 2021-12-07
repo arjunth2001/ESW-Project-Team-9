@@ -64,8 +64,8 @@ int feature_history[FEATURE_HISTORY_NUM][3];
 
 // Occupancy
 int global_occupancy;
-const int redLed = 2; // D2
-const int greenLed = 4; // D4
+const int redLed = 16; // D2
+const int greenLed = 17; // D4
 
 // Encryption
 #include "AES.h"
@@ -622,13 +622,14 @@ void loop()
   global_occupancy = predict_occupancy();
 
   // Light LEDs
-  if(global_occupancy){
+  if(global_occupancy == 1){
     digitalWrite(redLed, HIGH);
     digitalWrite(greenLed, LOW);
   }else{
     digitalWrite(redLed, LOW);
     digitalWrite(greenLed, HIGH);
   }
+  delay(500);
   
   Serial.println("-------------------------------------");
   Serial.println();
