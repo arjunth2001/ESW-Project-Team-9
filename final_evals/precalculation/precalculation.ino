@@ -524,6 +524,21 @@ void push()
   Serial.println(send(server + "/testing/", 4, data));
 }
 
+int predict_occupancy(){
+  double w0 = 0.0, w1 = 0.0, w2 = 0.0, bias = 0.0;
+  w0 = -0.11492526950611422;
+  w1 = 0.044143152320874346;
+  w2 = 	0.5745916039433981;
+  bias = -3.140857543046786;
+  double wx_bias = w0*global_feature1 + w1*global_feature2 + w2*global_feature3 + bias;
+  double output = 1.0/(1.0 + exp(-1.0 * wx_bias)); // Sigmoid
+  if(output > 0.5){
+    return 1;
+  }else{
+    return 0;
+  }
+}
+
 void loop()
 {
   if (WiFi.status() != WL_CONNECTED)
@@ -596,6 +611,8 @@ void loop()
     }
   }
   global_occupancy = predict_occupancy();
+
+  
 
   // End each frame with a linefeed
   Serial.println();
