@@ -62,6 +62,9 @@ int global_feature2 = 0;
 int global_feature3 = 0;
 int feature_history[FEATURE_HISTORY_NUM][3];
 
+// Occupancy
+int global_occupancy;
+
 // Encryption
 #include "AES.h"
 #include "Base64.h"
@@ -509,7 +512,7 @@ void push()
   }
   String time_stamp = timeClient.getFormattedDate();
   String grid_string = grid_in_string();
-  String info_to_send = String() + unique_id + "," + TotalActivePoints + "," + NumConnectedComponents + "," + sizeLargestComponent + "," + grid_string + "," + time_stamp;
+  String info_to_send = String() + global_occupancy +  "," + time_stamp;
 
   // info_to_send = encrypt(info_to_send);
   String info_hash = hash(info_to_send);
@@ -592,6 +595,7 @@ void loop()
       }
     }
   }
+  global_occupancy = predict_occupancy();
 
   // End each frame with a linefeed
   Serial.println();
