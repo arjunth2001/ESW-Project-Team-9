@@ -55,6 +55,13 @@ String formattedDate;
 const String cse_ip = "esw-onem2m.iiit.ac.in";
 const String server = "https://" + cse_ip + "/~/in-cse/in-name/Team-9";
 
+// Features
+const int FEATURE_HISTORY_NUM = 3;
+int global_feature1 = 0;
+int global_feature2 = 0;
+int global_feature3 = 0;
+int feature_history[FEATURE_HISTORY_NUM][3];
+
 // Encryption
 #include "AES.h"
 #include "Base64.h"
@@ -514,61 +521,85 @@ void push()
   Serial.println(send(server + "/testing/", 4, data));
 }
 
-void loop() {
-  if (WiFi.status() != WL_CONNECTED) {
+void loop()
+{
+  if (WiFi.status() != WL_CONNECTED)
+  {
     WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED)
+    {
       delay(500);
       Serial.print(".");
     }
     Serial.println("");
-    Serial.println("WiFi connected in while.");   
+    Serial.println("WiFi connected in while.");
     Serial.print("Local IP: http://");
-    Serial.print(WiFi .localIP());
+    Serial.print(WiFi.localIP());
     Serial.println("' to connect");
   }
   // Print the temperature value of each pixel in floating point degrees Celsius
-  // separated by commas 
-//   int j = 0;
-//   for(unsigned char i = 0; i < 64; i++){
-//     if(i % 8 == 0){
-//       Serial.println();
-//     }
-//     Serial.print(grideye.getPixelTemperature(i));
-//     Serial.print(",");
-//   } 
+  // separated by commas
+  //   int j = 0;
+  //   for(unsigned char i = 0; i < 64; i++){
+  //     if(i % 8 == 0){
+  //       Serial.println();
+  //     }
+  //     Serial.print(grideye.getPixelTemperature(i));
+  //     Serial.print(",");
+  //   }
 
   // Sending request to espcam server to take image and save it with name unique_id
   WiFiClient client;
-  http.begin(client, esp_cam_capture_address);
-  int httpResponseCode = http.POST(uint64ToString(unique_id));
-  Serial.print("HTTP Response code: ");
-  Serial.println(httpResponseCode);
+  // http.begin(client, esp_cam_capture_address);
+  // int httpResponseCode = http.POST(uint64ToString(unique_id));
+  // Serial.print("HTTP Response code: ");
+  // Serial.println(httpResponseCode);
 
-  // Free resources
-  http.end();
-  
+  // // Free resources
+  // http.end();
+  global_feature1 = 0;
+  global_feature2 = 0;
+  global_feature3 = 0;
+  for (int features_i = 0; features_i < FEATURE_HISTORY_NUM; features_i++)
+  {
     int row = 0;
     int col = 0;
-    for(unsigned char i = 0; i < 64; i++){
-        row = i/8;
-        col = i%8;
-        M[row][col] = grideye.getPixelTemperature(i);
+    for (unsigned char i = 0; i < 64; i++)
+    {
+      row = i / 8;
+      col = i % 8;
+      M[row][col] = grideye.getPixelTemperature(i);
     }
 
-    print_current_thermal_values();
+    // print_current_thermal_values();
 
     calculate_feature_grid();
 
     calculate_features();
-
+    feature_history[features_i][0] = TotalActivePoints;
+    feature_history[features_i][1] = unique_components;
+    feature_history[features_i][2] = sizeLargestComponent;
+    int update_global_feature = 0;
+    if(sizeLargestComponent > global_feature3){
+      update_global_feature = 1;
+    }
+    if(sizeLargestComponent == global_feature3){
+      if(TotalActivePoints > global_feature1){
+        update_global_feature = 1;
+      }else if(TotalActivePoints == global_feature1){
+        if(unique_components < global_feature2){
+          update_global_feature = 1;
+        }
+      }
+    }
+  }
 
   // End each frame with a linefeed
   Serial.println();
   Serial.println("-------------------------------------");
   Serial.println();
   Serial.println("**************************************");
-  push(); // Pushing data to OM2M
+  push();      // Pushing data to OM2M
   delay(3000); // Delay of 5 seconds to detect occupancy
   unique_id++;
 }
