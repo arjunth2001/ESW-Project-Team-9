@@ -613,6 +613,11 @@ void loop()
         }
       }
     }
+    if(update_global_feature == 1){
+        global_feature1 = TotalActivePoints;
+        global_feature2 = unique_components;
+        global_feature3 = sizeLargestComponent;
+    }
   }
   global_occupancy = predict_occupancy();
 
