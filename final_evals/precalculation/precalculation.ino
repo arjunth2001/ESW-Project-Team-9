@@ -582,8 +582,7 @@ void loop()
     int update_global_feature = 0;
     if(sizeLargestComponent > global_feature3){
       update_global_feature = 1;
-    }
-    if(sizeLargestComponent == global_feature3){
+    }else if(sizeLargestComponent == global_feature3){
       if(TotalActivePoints > global_feature1){
         update_global_feature = 1;
       }else if(TotalActivePoints == global_feature1){
