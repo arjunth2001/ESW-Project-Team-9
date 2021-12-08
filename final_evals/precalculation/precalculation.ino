@@ -56,7 +56,7 @@ const String cse_ip = "esw-onem2m.iiit.ac.in";
 const String server = "https://" + cse_ip + "/~/in-cse/in-name/Team-9";
 
 // Features
-const int FEATURE_HISTORY_NUM = 6;
+const int FEATURE_HISTORY_NUM = 3;
 int global_feature1 = 0;
 int global_feature2 = 0;
 int global_feature3 = 0;
@@ -64,8 +64,8 @@ int feature_history[FEATURE_HISTORY_NUM][3];
 
 // Occupancy
 int global_occupancy;
-const int redLed = 16; // D2
-const int greenLed = 17; // D4
+const int redLed = 16;
+const int greenLed = 17;
 
 unsigned long time_last_bg_update;
 
